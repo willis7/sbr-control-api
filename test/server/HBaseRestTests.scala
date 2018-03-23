@@ -28,7 +28,6 @@ class HBaseRestTests extends TestUtils with BeforeAndAfterEach with GuiceOneAppP
   private val columnFamilyEnterprise = "d"
   private val columnFamilyLinks = "l"
   private val firstPeriod = "201706"
-  private val secondPeriod = "201708"
 
   // We don't use the normal HBase REST port as it can make testing annoying, this is set as a Java Option
   // in the build.sbt

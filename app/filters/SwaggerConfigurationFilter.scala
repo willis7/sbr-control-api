@@ -1,10 +1,12 @@
+package filters
+
 import java.util
 
 import io.swagger.core.filter.SwaggerSpecFilter
 import io.swagger.model.ApiDescription
 import io.swagger.models.parameters.Parameter
-import io.swagger.models.{ Model, Operation }
 import io.swagger.models.properties.Property
+import io.swagger.models.{ Model, Operation }
 /**
  * Created by haqa on 24/07/2017.
  */
@@ -12,7 +14,6 @@ class SwaggerConfigurationFilter extends SwaggerSpecFilter {
 
   private val parametersNotAllowed: List[String] = List()
   private val propertiesNotAllowed: List[String] = List()
-  private val opertaionsNotAllowed: List[String] = List()
 
   def isParamAllowed(
     parameter: Parameter,
