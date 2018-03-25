@@ -116,6 +116,7 @@ lazy val api = (project in file("."))
       "org.scalatestplus.play"       %%    "scalatestplus-play"  %    "2.0.0"           % Test,
       "org.scalatest"                %%    "scalatest"           %    "3.0.4"           % Test,
       "com.github.tomakehurst"       %     "wiremock"            %    "1.33"            % Test,
+      "org.scalamock"                %%    "scalamock"           %    "4.1.0"           % Test,
       "org.webjars"                  %%    "webjars-play"        %    "2.5.0-3",
       "io.lemonlabs"                 %%    "scala-uri"           %    "0.5.0",
       "com.typesafe.scala-logging"   %%    "scala-logging"       %    "3.5.0",

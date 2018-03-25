@@ -2,7 +2,7 @@ import com.google.inject.AbstractModule
 import java.time.Clock
 
 import play.api.{ Configuration, Environment }
-import services.{ DataAccess, HBaseRestDataAccess }
+import services.{ DataAccess, HBaseRestDataAccess, HBaseRestLocalUnitRepository, LocalUnitRepository }
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -17,6 +17,7 @@ import services.{ DataAccess, HBaseRestDataAccess }
 class Module(environment: Environment, configuration: Configuration) extends AbstractModule {
   override def configure() = {
     bind(classOf[DataAccess]).to(classOf[HBaseRestDataAccess])
+    bind(classOf[LocalUnitRepository]).to(classOf[HBaseRestLocalUnitRepository])
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
   }
 }

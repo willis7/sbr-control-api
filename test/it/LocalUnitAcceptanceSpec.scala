@@ -3,6 +3,7 @@ import org.scalatest.OptionValues
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 import play.mvc.Http.MimeTypes.JSON
+import uk.gov.ons.sbr.models.localunit.{ Address, EnterpriseLink, LocalUnit }
 
 class LocalUnitAcceptanceSpec extends ServerAcceptanceSpec with WithWireMockHBase with OptionValues {
   private val ERN = "1000000012"
@@ -11,22 +12,9 @@ class LocalUnitAcceptanceSpec extends ServerAcceptanceSpec with WithWireMockHBas
   private val LatestPeriod = "201803"
 
   // TODO move all this as we develop an implementation ...
-  private case class Address(line1: String, line2: String, line3: String, line4: String, line5: String, postcode: String)
-  private case class EnterpriseLink(ern: String, entref: String)
-  private case class LocalUnit(lurn: String, luref: String, name: String, tradingStyle: String, sic07: String,
-    employees: Int, enterprise: EnterpriseLink, address: Address)
-
-  private object Address {
-    implicit val reads = Json.reads[Address]
-  }
-
-  private object EnterpriseLink {
-    implicit val reads = Json.reads[EnterpriseLink]
-  }
-
-  private object LocalUnit {
-    implicit val reads = Json.reads[LocalUnit]
-  }
+  implicit val addressReads = Json.reads[Address]
+  implicit val enterpriseLinkReads = Json.reads[EnterpriseLink]
+  implicit val localUnitReads = Json.reads[LocalUnit]
   // end TO MOVE
 
   private val LocalUnitMultiplePeriodsHBaseResponseBody =
@@ -71,8 +59,8 @@ class LocalUnitAcceptanceSpec extends ServerAcceptanceSpec with WithWireMockHBas
     }"""
 
   feature("retrieve the latest local unit") {
-    // TOD change "ignore" to "scenario" to make this runnable
-    ignore("for an Enterprise reference (ERN) and Local Unit reference (LURN) when the local unit exists over many periods") { wsClient =>
+    // TODO revert to "ignore" when incomplete
+    scenario("for an Enterprise reference (ERN) and Local Unit reference (LURN) when the local unit exists over many periods") { wsClient =>
       Given(s"a local unit exists for multiple periods in HBase with a Local Unit reference of $LURN and Enterprise reference of $ERN")
       stubHbaseFor(aLocalUnitRequest(withErn = ERN, withLurn = LURN).willReturn(
         anOkResponse().withBody(LocalUnitMultiplePeriodsHBaseResponseBody)
