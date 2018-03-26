@@ -1,8 +1,10 @@
 import com.google.inject.AbstractModule
 import java.time.Clock
 
-import play.api.{ Configuration, Environment }
-import services.{ DataAccess, HBaseRestDataAccess, HBaseRestLocalUnitRepository, LocalUnitRepository }
+import play.api.{Configuration, Environment}
+import repository.hbase.HBaseRestLocalUnitRepository
+import repository.{HBaseRestLocalUnitRepository, LocalUnitRepository}
+import services.{DataAccess, HBaseRestDataAccess}
 
 /**
  * This class is a Guice module that tells Guice how to bind several

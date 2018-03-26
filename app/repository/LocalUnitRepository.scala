@@ -1,4 +1,4 @@
-package services
+package repository
 
 import uk.gov.ons.sbr.models.localunit.LocalUnit
 

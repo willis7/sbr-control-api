@@ -67,7 +67,7 @@ class LocalUnitAcceptanceSpec extends ServerAcceptanceSpec with WithWireMockHBas
       ))
 
       When(s"the latest unit with Local Unit reference $LURN and Enterprise reference $ERN is requested")
-      val response = await(wsClient.url(s"/v1/enterprises/$ERN/localunits/$LURN?max=1").get())
+      val response = await(wsClient.url(s"/v1/enterprises/$ERN/localunits/$LURN?maxPeriods=1").get())
 
       Then(s"the details of the local unit with Local Unit reference $LURN for the latest period are returned")
       response.status shouldBe OK

@@ -1,13 +1,13 @@
 package controllers.v1
 
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{ FreeSpec, Matchers, OptionValues }
+import org.scalatest.{FreeSpec, Matchers, OptionValues}
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import services.LocalUnitRepository
-import uk.gov.ons.sbr.models.localunit.{ Address, EnterpriseLink, LocalUnit }
+import uk.gov.ons.sbr.models.localunit.{Address, EnterpriseLink, LocalUnit}
 import play.api.test.Helpers._
 import play.mvc.Http.MimeTypes.JSON
+import repository.LocalUnitRepository
 
 import scala.concurrent.Future
 

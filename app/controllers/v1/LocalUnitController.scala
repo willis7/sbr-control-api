@@ -2,8 +2,8 @@ package controllers.v1
 
 import javax.inject.Inject
 import play.api.libs.json.Json
-import play.api.mvc.{ Action, Controller }
-import services.LocalUnitRepository
+import play.api.mvc.{Action, Controller}
+import repository.LocalUnitRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
