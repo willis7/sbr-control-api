@@ -1,10 +1,10 @@
-import com.google.inject.AbstractModule
 import java.time.Clock
 
-import play.api.{Configuration, Environment}
-import repository.hbase.HBaseRestLocalUnitRepository
-import repository.{HBaseRestLocalUnitRepository, LocalUnitRepository}
-import services.{DataAccess, HBaseRestDataAccess}
+import com.google.inject.AbstractModule
+import play.api.{ Configuration, Environment }
+import repository.{ LocalUnitRepository, RegexQuery }
+import repository.hbase.{ HBaseRestLocalUnitRepository, HBaseRestRegexQuery }
+import services.{ DataAccess, HBaseRestDataAccess }
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -19,6 +19,7 @@ import services.{DataAccess, HBaseRestDataAccess}
 class Module(environment: Environment, configuration: Configuration) extends AbstractModule {
   override def configure() = {
     bind(classOf[DataAccess]).to(classOf[HBaseRestDataAccess])
+    bind(classOf[RegexQuery]).to(classOf[HBaseRestRegexQuery])
     bind(classOf[LocalUnitRepository]).to(classOf[HBaseRestLocalUnitRepository])
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
   }

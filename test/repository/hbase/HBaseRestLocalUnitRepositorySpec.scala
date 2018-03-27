@@ -1,9 +1,13 @@
 package repository.hbase
 
+import java.time.Month.MARCH
+import java.time.YearMonth
+
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FreeSpec, Matchers, OptionValues}
-import repository.Repository
+import repository.{RegexQuery, Row}
+import uk.gov.ons.sbr.models.Envelope
 import uk.gov.ons.sbr.models.localunit.{Address, EnterpriseLink, LocalUnit}
 
 import scala.concurrent.Future
@@ -11,22 +15,37 @@ import scala.concurrent.Future
 class HBaseRestLocalUnitRepositorySpec extends FreeSpec with Matchers with MockFactory with OptionValues with ScalaFutures {
 
   private trait Fixture {
-    val repository = mock[Repository]
-    val localUnitRepository = new HBaseRestLocalUnitRepository(repository)
+    val Ern = "1000000012"
+    val Lurn = "900000011"
+
+    val regexQuery = mock[RegexQuery]
+    val localUnitRepository = new HBaseRestLocalUnitRepository(regexQuery)
+
+    def columnsFor(ern: String, lurn: String, id: String): Map[String, String] =
+      Map("lurn" -> lurn, "luref" -> s"luref-$id", "ern" -> ern, "entref" -> s"entref-$id",
+        "name" -> s"name-$id", "tradingstyle" -> s"tradingstyle-$id", "address1" -> s"address1-$id",
+        "address2" -> s"address2-$id", "address3" -> s"address3-$id", "address4" -> s"address4-$id",
+        "address5" -> s"address5-$id", "postcode" -> s"postcode-$id", "sic07" -> s"poscode-$id",
+        "employees" -> "42")
   }
 
   "A LocalUnit Repository" - {
-    "foo" in new Fixture {
-      val record = Map("lurn" -> "", "luref" -> "", "ern" -> "", "entref" -> "", "name" -> "", "tradingstyle" -> "",
-        "address1" -> "", "address2" -> "", "address3" -> "", "address4" -> "", "address5" -> "", "postcode" -> "",
-        "sic07" -> "", "employees" -> "")
+    "can perform a wildcard period search to retrieve then latest local unit with the target Ern and Lurn" in new Fixture {
+      val row201802 = Row(rowKey = s"${Ern.reverse}~201802~$Lurn", columnsFor(Ern, Lurn, "201802"))
+      val row201803 = Row(rowKey = s"${Ern.reverse}~201803~$Lurn", columnsFor(Ern, Lurn, "201803"))
+      (regexQuery.find _).expects("local_unit", s"${Ern.reverse}-[0-9]{6}~$Lurn").returning(Future.successful(
+        Seq(row201802, row201803)))
+      val latestPeriod = "201803"
 
-      (repository.find _).expects("local_unit", "", "d").returning(Future.successful(record))
-
-      whenReady(localUnitRepository.retrieveLatest(ern = "", lurn = "")) { result =>
-        result.value shouldBe LocalUnit(lurn = "", luref = "", name = "", tradingStyle = "", sic07 = "", employees = 42,
-          enterprise = EnterpriseLink(ern = "", entref = ""),
-          address = Address(line1 = "", line2 = "", line3 = "", line4 = "", line5 = "", postcode = ""))
+      whenReady(localUnitRepository.retrieveLatest(Ern, Lurn)) { result =>
+        result.value shouldBe Envelope(period = YearMonth.of(2018, MARCH),
+          LocalUnit(lurn = Lurn, luref = s"luref-$latestPeriod", name = s"name-$latestPeriod",
+            tradingStyle = s"tradingstyle-$latestPeriod", sic07 = s"sic07-$latestPeriod", employees = 42,
+            enterprise = EnterpriseLink(ern = Ern, entref = s"entref-$latestPeriod"),
+            address = Address(line1 = s"line1-$latestPeriod", line2 = s"line2-$latestPeriod",
+              line3 = s"line3-$latestPeriod", line4 = s"line4-$latestPeriod", line5 = s"line5-$latestPeriod",
+              postcode = s"postcode-$latestPeriod"))
+        )
       }
     }
   }

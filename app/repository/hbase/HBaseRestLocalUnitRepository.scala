@@ -1,14 +1,18 @@
 package repository.hbase
 
-import repository.{LocalUnitRepository, Repository}
-import uk.gov.ons.sbr.models.localunit.{Address, EnterpriseLink, LocalUnit}
+import javax.inject.Inject
+import repository.{LocalUnitRepository, RegexQuery, Row}
+import uk.gov.ons.sbr.models.Envelope
+import uk.gov.ons.sbr.models.localunit.LocalUnit
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class HBaseRestLocalUnitRepository(repository: Repository) extends LocalUnitRepository {
-  override def retrieveLatest(ern: String, lurn: String): Future[Option[LocalUnit]] =
-    Future.successful(Some(LocalUnit(lurn = "foo", luref = "bar", name = "baz", tradingStyle = "", sic07 = "",
-      employees = 42, enterprise = EnterpriseLink(ern = "oof", entref = "rab"),
-      address = Address(line1 = "22 Acacia Avenue", line2 = "", line3 = "", line4 = "", line5 = "",
-        postcode = "NP10 8XY"))))
+class HBaseRestLocalUnitRepository @Inject() (regexQuery: RegexQuery) extends LocalUnitRepository {
+
+  override def retrieveLatest(ern: String, lurn: String)(implicit ec: ExecutionContext): Future[Option[Envelope[LocalUnit]]] =
+    regexQuery.find("local_unit", s"${ern.reverse}~[0-9]{6}~$lurn").map { rows =>
+      rows.map(toLocalUnitEnvelope).lastOption
+    }
+
+  private def toLocalUnitEnvelope(row: Row): Envelope[LocalUnit] = ???
 }
