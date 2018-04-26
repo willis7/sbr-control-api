@@ -23,7 +23,7 @@ import repository.EnterpriseUnitRepository
 @Singleton
 class EnterpriseUnitController @Inject() (repository: EnterpriseUnitRepository) extends Controller with EnterpriseUnitApi {
 
-  def retrieveEnterpriseUnit(ernStr: String, periodStr: String): Action[AnyContent] = Action.async {
+  override def retrieveEnterpriseUnit(ernStr: String, periodStr: String): Action[AnyContent] = Action.async {
     repository.retrieveEnterpriseUnit(Ern(ernStr), Period.fromString(periodStr)).map { errorOrOptEnterprise =>
       errorOrOptEnterprise.fold(resultOnFailure, resultOnSuccessWithAtMostOneUnit[Enterprise])
     }
