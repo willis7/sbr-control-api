@@ -1,91 +1,155 @@
 #!groovy
-@Library('jenkins-pipeline-shared@develop') _
+// @Library('jenkins-pipeline-shared@develop') _
 
 pipeline {
     agent any
-
+    options { timeout(time: 15) }
+    environment {
+        SBT_TOOL = "${tool name: 'sbt-0.13.13', type: 'org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation'}/bin"
+        PATH = "${env.SBT_TOOL}:${env.PATH}"
+    }
     stages {
         stage('Build') {
-            echo 'compiling project'
+            steps {
+                echo 'compiling project'
+                sh 'sbt compile'
+            }
         }
 
         stage('Validate') {
-            failFast true
-            parallel {
-                stage('Unit') {
-                    echo 'running unit tests'
-                }
-
-                stage('Static') {
-                    echo 'performing static code analysis'
+            steps {
+                parallel(
+                    'Static': {
+                        echo 'performing static code analysis'
+                        sh '''
+                        sbt scalastyleGenerateConfig
+                        sbt scalastyle
+                        sbt scapegoat
+                        ''' },
+                    'Mutation': {
+                        echo 'performing mutation testing'
+                        sh 'sbt mutationTest' }
+                )
+            }
+            post {
+                success {
+                    publishHTML(target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: true,
+                        reportDir: 'target/mutation-analysis-report',
+                        reportFiles: 'overview.html',
+                        reportTitles: "ScalaMu Report",
+                        reportName: "ScalaMu Report"
+                    ])
+                    // TODO: add health thresholds
+                    checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: 'target/scalastyle-result.xml', unHealthy: ''
+                    checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: 'target/scala-2.11/scapegoat-report/scapegoat-scalastyle.xml', unHealthy: ''
                 }
             }
         }
 
         stage('Integration') {
-            echo 'running integration tests'
+            steps {
+                echo 'running integration tests'
+                // sh ''
+            }
         }
 
         stage('Publish') {
-            echo 'packaging and publishing release to artifactory'
+            when {
+                branch 'master'
+            }
+            steps {
+                echo 'packaging and publishing release candidate to artifactory'
+                sh 'sbt package'
+                // push to artifactory snapshot
+            }
         }
 
         stage('Deploy Dev') {
+            environment { 
+                DEPLOY_TO = 'dev'
+            }
             when {
                 branch 'master'
-                environment name: 'DEPLOY_TO', value: 'development'
             }
-            echo 'deploying release from artifactory into Development'
+            steps {
+                echo "deploying release from artifactory into ${env.DEPLOY_TO}"
+                // download version
+                // deploy
+            }
         }
 
-        stage('SIT') {
+        stage('Test Dev') {
             when {
                 branch 'master'
             }
-            echo 'performing a system integration test'
+            steps {
+                echo 'performing a system integration test'
+                // sh 'curl ...cfapps.io'
+            }
         }
 
         stage('Deploy UAT') {
+            environment { 
+                DEPLOY_TO = 'test'
+            }
             when {
                 branch 'master'
-                environment name: 'DEPLOY_TO', value: 'uat'
             }
-            echo 'deploying release from artifactory into UAT'
+            steps {
+                echo "deploying release from artifactory into ${env.DEPLOY_TO}"
+            }
         }
 
-        stage('NFR') {
+        stage('Test UAT') {
             when {
                 branch 'master'
             }
-            failFast true
-            parallel {
-                stage('Regression') {
+            steps {
+                parallel('Regression': {
                     echo 'running regression tests'
-                }
-                
-                stage('Performance') {
-                    echo 'running performance/load tests'
-                }
-
-                stage('Security') {
+                },
+                        'Preformance': {
+                    echo 'running performance tests'
+                },
+                        'Security': {
                     echo 'running security tests'
                 }
+                )
             }
         }
-        
+          
+        stage('Promote') {
+            steps {
+                echo 'promoting candidate to release'
+                // tag
+                // push tag
+                // push to artifactory release
+            }
+        }
+   
         stage('Deploy Production') {
+            environment { 
+                DEPLOY_TO = 'beta'
+            }
             when {
                 branch 'master'
-                environment name: 'DEPLOY_TO', value: 'production'
             }
-            echo 'deploying release from artifactory into Production'
+            steps {
+                echo "deploying release from artifactory into ${env.DEPLOY_TO}"
+            }
         }
 
         stage('Regression') {
             when {
                 branch 'master'
             }
-            echo 'performing a small regression test'
+            steps {
+                echo 'performing a small regression test'
+                // sh 'curl ...cfapps.io'
+            }
         }
     }
 }
