@@ -5,7 +5,7 @@ pipeline {
     agent any
     options { timeout(time: 5) }
     tools {
-        sbt 'sbt_0.13.13'
+        org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation 'sbt_0.13.13'
     }
     stages {
         stage('Build') {
