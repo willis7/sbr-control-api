@@ -3,12 +3,16 @@
 
 pipeline {
     agent any
-
+    options { timeout(time: 5) }
+    tools {
+        sbt 'sbt_0.13.13'
+    }
     stages {
         stage('Build') {
             steps {
                 echo 'compiling project'
                 checkout scm
+                sh 'sbt compile'
             }
         }
 
