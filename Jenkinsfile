@@ -1,33 +1,39 @@
 #!groovy
-@Library('jenkins-pipeline-shared@develop') _
+// @Library('jenkins-pipeline-shared@develop') _
 
 pipeline {
     agent any
 
     stages {
         stage('Build') {
-            echo 'compiling project'
+            steps {
+                echo 'compiling project'
+                checkout scm
+            }
         }
 
         stage('Validate') {
-            failFast true
-            parallel {
-                stage('Unit') {
+            steps {
+                parallel('Unit': {
                     echo 'running unit tests'
-                }
-
-                stage('Static') {
+                },
+                        'Static': {
                     echo 'performing static code analysis'
                 }
+                )
             }
         }
 
         stage('Integration') {
-            echo 'running integration tests'
+            steps {
+                echo 'running integration tests'
+            }
         }
 
         stage('Publish') {
-            echo 'packaging and publishing release to artifactory'
+            steps {
+                echo 'packaging and publishing release to artifactory'
+            }
         }
 
         stage('Deploy Dev') {
@@ -35,14 +41,18 @@ pipeline {
                 branch 'master'
                 environment name: 'DEPLOY_TO', value: 'development'
             }
-            echo 'deploying release from artifactory into Development'
+            steps {
+                echo "deploying release from artifactory into ${env.DEPLOY_TO}"
+            }
         }
 
         stage('SIT') {
             when {
                 branch 'master'
             }
-            echo 'performing a system integration test'
+            steps {
+                echo 'performing a system integration test'
+            }
         }
 
         stage('Deploy UAT') {
@@ -50,26 +60,26 @@ pipeline {
                 branch 'master'
                 environment name: 'DEPLOY_TO', value: 'uat'
             }
-            echo 'deploying release from artifactory into UAT'
+            steps {
+                echo "deploying release from artifactory into ${env.DEPLOY_TO}"
+            }
         }
 
-        stage('NFR') {
+        stage('Test UAT') {
             when {
                 branch 'master'
             }
-            failFast true
-            parallel {
-                stage('Regression') {
+            steps {
+                parallel('Regression': {
                     echo 'running regression tests'
-                }
-                
-                stage('Performance') {
-                    echo 'running performance/load tests'
-                }
-
-                stage('Security') {
+                },
+                        'Preformance': {
+                    echo 'running performance tests'
+                },
+                        'Security': {
                     echo 'running security tests'
                 }
+                )
             }
         }
         
@@ -78,14 +88,18 @@ pipeline {
                 branch 'master'
                 environment name: 'DEPLOY_TO', value: 'production'
             }
-            echo 'deploying release from artifactory into Production'
+            steps {
+                echo "deploying release from artifactory into ${env.DEPLOY_TO}"
+            }
         }
 
         stage('Regression') {
             when {
                 branch 'master'
             }
-            echo 'performing a small regression test'
+            steps {
+                echo 'performing a small regression test'
+            }
         }
     }
 }
