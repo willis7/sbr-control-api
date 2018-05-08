@@ -4,9 +4,6 @@
 pipeline {
     agent any
     options { timeout(time: 5) }
-    tools {
-        org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation 'sbt_0.13.13'
-    }
     environment {
         SBT_TOOL = "${tool name: 'sbt-0.13.13', type: 'org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation'}/bin"
         PATH = "${env.SBT_TOOL}:${env.PATH}"
