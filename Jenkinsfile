@@ -3,7 +3,10 @@
 
 pipeline {
     agent any
-    options { timeout(time: 15) }
+    options { 
+        timeout(time: 15)
+        skipDefaultCheckout()
+    }
     environment {
         SBT_TOOL = "${tool name: 'sbt-0.13.13', type: 'org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation'}/bin"
         PATH = "${env.SBT_TOOL}:${env.PATH}"
@@ -35,6 +38,15 @@ pipeline {
                        sbt scalastyle
                        sbt scapegoat
                     '''
+                    publishHTML(target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: true,
+                        reportDir: 'target/mutation-analysis-report',
+                        reportFiles: 'overview.html',
+                        reportTitles: "ScalaMu Report",
+                        reportName: "ScalaMu Report"
+                    ])
                 },
                         'Mutation': {
                     echo 'performing mutation testing'
