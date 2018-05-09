@@ -21,9 +21,23 @@ pipeline {
             steps {
                 parallel('Unit': {
                     echo 'running unit tests'
+                    sh '''
+                        sbt test
+                        sbt coverage
+                        sbt coverageReport
+                    '''
                 },
                         'Static': {
                     echo 'performing static code analysis'
+                    sh '''
+                       sbt scalastyleGenerateConfig
+                       sbt scalastyle
+                       sbt scapegoat
+                    '''
+                },
+                        'Mutation': {
+                    echo 'performing mutation testing'
+                    sh 'sbt mutationTest'
                 }
                 )
             }
@@ -32,12 +46,13 @@ pipeline {
         stage('Integration') {
             steps {
                 echo 'running integration tests'
+                // sh ''
             }
         }
 
         stage('Publish') {
             steps {
-                echo 'packaging and publishing release to artifactory'
+                echo 'packaging and publishing release candidate to artifactory'
             }
         }
 
@@ -87,7 +102,15 @@ pipeline {
                 )
             }
         }
-        
+          
+        stage('Promote') {
+            steps {
+                echo 'promoting candidate to release'
+                // tag
+                // push tag
+            }
+        }
+   
         stage('Deploy Production') {
             when {
                 branch 'master'
