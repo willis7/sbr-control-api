@@ -11,3 +11,5 @@ project/project/
 
 .cache
 .history
+
+scalastyle-config.xml

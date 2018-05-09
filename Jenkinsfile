@@ -38,21 +38,26 @@ pipeline {
                        sbt scalastyle
                        sbt scapegoat
                     '''
-                    publishHTML(target: [
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: false,
-                        keepAll: true,
-                        reportDir: 'target/mutation-analysis-report',
-                        reportFiles: 'overview.html',
-                        reportTitles: "ScalaMu Report",
-                        reportName: "ScalaMu Report"
-                    ])
                 },
                         'Mutation': {
                     echo 'performing mutation testing'
                     sh 'sbt mutationTest'
                 }
                 )
+            }
+        }
+        post {
+            always {
+                publishHTML(target: [
+                    allowMissing: true,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: true,
+                    reportDir: 'target/mutation-analysis-report',
+                    reportFiles: 'overview.html',
+                    reportTitles: "ScalaMu Report",
+                    reportName: "ScalaMu Report"
+                ])
+                junit 'target/scala-2.11/scapegoat-report/scapegoat-scalastyle.xml'
             }
         }
 
