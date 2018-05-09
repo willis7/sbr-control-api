@@ -3,10 +3,7 @@
 
 pipeline {
     agent any
-    options { 
-        timeout(time: 15)
-        skipDefaultCheckout()
-    }
+    options { timeout(time: 15) }
     environment {
         SBT_TOOL = "${tool name: 'sbt-0.13.13', type: 'org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation'}/bin"
         PATH = "${env.SBT_TOOL}:${env.PATH}"
@@ -15,7 +12,6 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'compiling project'
-                checkout scm
                 sh 'sbt compile'
             }
         }
@@ -47,7 +43,8 @@ pipeline {
                         reportTitles: "ScalaMu Report",
                         reportName: "ScalaMu Report"
                     ])
-                    junit 'target/scala-2.11/scapegoat-report/scapegoat-scalastyle.xml'
+                    cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'target/scala-2.11/scapegoat-report/scapegoat-scalastyle.xml', conditionalCoverageTargets: '70, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '80, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '80, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
+
                 }
             }
         }
@@ -65,13 +62,14 @@ pipeline {
             }
             steps {
                 echo 'packaging and publishing release candidate to artifactory'
+                // create jar
+                // push to artifactory snapshot
             }
         }
 
         stage('Deploy Dev') {
             when {
                 branch 'master'
-                environment name: 'DEPLOY_TO', value: 'development'
             }
             steps {
                 echo "deploying release from artifactory into ${env.DEPLOY_TO}"
@@ -90,7 +88,6 @@ pipeline {
         stage('Deploy UAT') {
             when {
                 branch 'master'
-                environment name: 'DEPLOY_TO', value: 'uat'
             }
             steps {
                 echo "deploying release from artifactory into ${env.DEPLOY_TO}"
@@ -120,13 +117,13 @@ pipeline {
                 echo 'promoting candidate to release'
                 // tag
                 // push tag
+                // push to artifactory release
             }
         }
    
         stage('Deploy Production') {
             when {
                 branch 'master'
-                environment name: 'DEPLOY_TO', value: 'production'
             }
             steps {
                 echo "deploying release from artifactory into ${env.DEPLOY_TO}"
