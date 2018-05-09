@@ -22,15 +22,6 @@ pipeline {
 
         stage('Validate') {
             steps {
-                // parallel('Unit': {
-                //     echo 'running unit tests'
-                //     sh 'sbt test'
-                //     // sh '''
-                //     //     sbt test
-                //     //     sbt coverage
-                //     //     sbt coverageReport
-                //     // '''
-                // },
                 parallel('Static': {
                     echo 'performing static code analysis'
                     sh '''
@@ -45,19 +36,19 @@ pipeline {
                 }
                 )
             }
-        }
-        post {
-            always {
-                publishHTML(target: [
-                    allowMissing: true,
-                    alwaysLinkToLastBuild: false,
-                    keepAll: true,
-                    reportDir: 'target/mutation-analysis-report',
-                    reportFiles: 'overview.html',
-                    reportTitles: "ScalaMu Report",
-                    reportName: "ScalaMu Report"
-                ])
-                junit 'target/scala-2.11/scapegoat-report/scapegoat-scalastyle.xml'
+            post {
+                always {
+                    publishHTML(target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: true,
+                        reportDir: 'target/mutation-analysis-report',
+                        reportFiles: 'overview.html',
+                        reportTitles: "ScalaMu Report",
+                        reportName: "ScalaMu Report"
+                    ])
+                    junit 'target/scala-2.11/scapegoat-report/scapegoat-scalastyle.xml'
+                }
             }
         }
 
