@@ -21,11 +21,12 @@ pipeline {
             steps {
                 parallel('Unit': {
                     echo 'running unit tests'
-                    sh '''
-                        sbt test
-                        sbt coverage
-                        sbt coverageReport
-                    '''
+                    sh 'sbt test'
+                    // sh '''
+                    //     sbt test
+                    //     sbt coverage
+                    //     sbt coverageReport
+                    // '''
                 },
                         'Static': {
                     echo 'performing static code analysis'
