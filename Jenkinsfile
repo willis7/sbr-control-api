@@ -19,16 +19,16 @@ pipeline {
 
         stage('Validate') {
             steps {
-                parallel('Unit': {
-                    echo 'running unit tests'
-                    sh 'sbt test'
-                    // sh '''
-                    //     sbt test
-                    //     sbt coverage
-                    //     sbt coverageReport
-                    // '''
-                },
-                        'Static': {
+                // parallel('Unit': {
+                //     echo 'running unit tests'
+                //     sh 'sbt test'
+                //     // sh '''
+                //     //     sbt test
+                //     //     sbt coverage
+                //     //     sbt coverageReport
+                //     // '''
+                // },
+                parallel('Static': {
                     echo 'performing static code analysis'
                     sh '''
                        sbt scalastyleGenerateConfig
@@ -52,6 +52,9 @@ pipeline {
         }
 
         stage('Publish') {
+            when {
+                branch 'master'
+            }
             steps {
                 echo 'packaging and publishing release candidate to artifactory'
             }
