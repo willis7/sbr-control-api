@@ -44,8 +44,8 @@ pipeline {
                         reportName: "ScalaMu Report"
                     ])
                     // TODO: add health thresholds
-                    checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: 'target/scalastyle-result.xml', unHealthy: ''
-                    checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: 'target/scala-2.11/scapegoat-report/scapegoat-scalastyle.xml', unHealthy: ''
+                    checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: ['target/scalastyle-result.xml', 'target/scala-2.11/scapegoat-report/scapegoat-scalastyle.xml'], unHealthy: ''
+                    // checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: 'target/scala-2.11/scapegoat-report/scapegoat-scalastyle.xml', unHealthy: ''
                 }
             }
         }
