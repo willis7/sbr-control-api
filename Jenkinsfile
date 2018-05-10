@@ -33,7 +33,7 @@ pipeline {
                 )
             }
             post {
-                always {
+                success {
                     publishHTML(target: [
                         allowMissing: true,
                         alwaysLinkToLastBuild: false,
